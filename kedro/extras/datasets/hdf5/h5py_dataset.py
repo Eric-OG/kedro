@@ -79,7 +79,7 @@ class H5pyDataSet(AbstractVersionedDataSet):
         return h5py.File(file_id, **h5_file_args, **load_args)
 
     @staticmethod
-    def __h5py_to_binary(h5f, save_args):
+    def __h5py_to_binary(h5f: h5py.File, save_args):
         bio = BytesIO()
         with h5py.File(bio, 'w', **save_args) as biof:
             for _, value in h5f.items():
