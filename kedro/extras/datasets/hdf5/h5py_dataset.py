@@ -38,16 +38,24 @@ class H5pyDataSet(AbstractVersionedDataSet):
     ::
 
         >>> from kedro.extras.datasets.hdf5 import H5pyDataSet
-        >>> import pandas as pd
+        >>> from tempfile import TemporaryFile
+        >>> import numpy as np
+        >>> import h5py
         >>>
-        >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        >>>                      'col3': [5, 6]})
+        >>> file = TemporaryFile()
+        >>> h5f = h5py.File(file)
+        >>> dataset = h5f.create_dataset('foo', data=[1,2])
         >>>
         >>> # data_set = H5pyDataSet(filepath="gcs://bucket/test.hdf")
         >>> data_set = H5pyDataSet(filepath="test.h5")
-        >>> data_set.save(data)
+        >>> # Saved and loaded objects are both h5py.File instances
+        >>> data_set.save(h5f)
         >>> reloaded = data_set.load()
-        >>> assert data.equals(reloaded)
+        >>> assert 'foo' in reloaded
+        >>> np.testing.assert_equal(reloaded['foo'][()], [1, 2])
+        >>>
+        >>> h5f.close()
+        >>> file.close()
 
     """
 
