@@ -44,20 +44,22 @@ def dummy_filepath_hdf(tmp_path):
 
 @pytest.fixture
 def dummy_h5f(dummy_filepath_hdf):
-    h5f = h5py.File(dummy_filepath_hdf, 'w')
-    group = h5f.create_group('foo')
-    group.create_dataset('a', data=np.arange(4).reshape((2,2)))
-    h5f.create_dataset('b', data=np.array([1, 2]))
+    h5f = h5py.File(dummy_filepath_hdf, "w")
+    group = h5f.create_group("foo")
+    group.create_dataset("a", data=np.arange(4).reshape((2, 2)))
+    h5f.create_dataset("b", data=np.array([1, 2]))
     return h5f
 
 
 def assert_h5py_equal(
-        expected: Union[h5py.File, h5py.Dataset],
-        received: Union[h5py.File, h5py.Dataset]) -> bool:
+    expected: Union[h5py.File, h5py.Dataset], received: Union[h5py.File, h5py.Dataset]
+) -> bool:
 
     try:
         if isinstance(expected, h5py.Dataset) or isinstance(received, h5py.Dataset):
-            assert isinstance(expected, h5py.Dataset) and isinstance(received, h5py.Dataset)
+            assert isinstance(expected, h5py.Dataset) and isinstance(
+                received, h5py.Dataset
+            )
             # Indexing a Dataset with () returns all its values
             # which in this case are assumed to be numpy arrays
             np.testing.assert_equal(expected[()], received[()])
@@ -144,7 +146,6 @@ class TestH5pyDataSet:
         data_set.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
-
     def test_thread_lock_usage(self, hdf_data_set, dummy_h5f, mocker):
         """Test thread lock usage."""
         # pylint: disable=no-member
@@ -179,7 +180,6 @@ class TestH5pyDataSetVersioned:
         assert "H5pyDataSet" in str(ds)
         assert "protocol" in str(ds_versioned)
         assert "protocol" in str(ds)
-
 
     def test_save_and_load(self, versioned_hdf_data_set, dummy_h5f):
         """Test that saved and reloaded data matches the original one for

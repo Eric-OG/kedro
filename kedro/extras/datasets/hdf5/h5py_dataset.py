@@ -1,12 +1,13 @@
 """``H5pyDataSet`` loads/saves data from/to a hdf file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses h5py.File to handle the hdf file.
 """
+
+import tempfile
 from copy import deepcopy
+from io import BytesIO
 from pathlib import PurePosixPath
 from threading import Lock
 from typing import Any, Dict
-import tempfile
-from io import BytesIO
 
 import fsspec
 import h5py
@@ -18,6 +19,7 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
+
 
 class H5pyDataSet(AbstractVersionedDataSet):
     """``H5pyDataSet`` loads/saves data from/to a hdf file using an underlying
@@ -73,15 +75,11 @@ class H5pyDataSet(AbstractVersionedDataSet):
         file_access_property_list.set_file_image(binary)
 
         file_id_args = {
-            'fapl': file_access_property_list,
-            'flags': h5py.h5f.ACC_RDONLY,
-            'name': next(tempfile._get_candidate_names()).encode(),
+            "fapl": file_access_property_list,
+            "flags": h5py.h5f.ACC_RDONLY,
+            "name": next(tempfile._get_candidate_names()).encode(),
         }
-        h5_file_args = {
-            'backing_store': False,
-            'driver': 'core',
-            'mode': 'r'
-        }
+        h5_file_args = {"backing_store": False, "driver": "core", "mode": "r"}
 
         file_id = h5py.h5f.open(**file_id_args)
         return h5py.File(file_id, **h5_file_args, **load_args)
@@ -89,15 +87,17 @@ class H5pyDataSet(AbstractVersionedDataSet):
     @staticmethod
     def __h5py_to_binary(h5f: h5py.File, save_args):
         bio = BytesIO()
-        with h5py.File(bio, 'w', **save_args) as biof:
+        with h5py.File(bio, "w", **save_args) as biof:
             for _, value in h5f.items():
-                h5f.copy(value, biof,
-                        expand_soft=True,
-                        expand_external=True,
-                        expand_refs=True)
+                h5f.copy(
+                    value,
+                    biof,
+                    expand_soft=True,
+                    expand_external=True,
+                    expand_refs=True,
+                )
             biof.close()
             return bio.getvalue()
-
 
     # pylint: disable=too-many-arguments
     def __init__(
