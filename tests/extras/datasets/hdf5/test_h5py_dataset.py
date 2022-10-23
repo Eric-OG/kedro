@@ -148,11 +148,11 @@ class TestH5pyDataSet:
 
     def test_thread_lock_usage(self, hdf_data_set, dummy_h5f, mocker):
         """Test thread lock usage."""
-        # pylint: disable=no-member
         mocked_lock = H5pyDataSet._lock
         mocked_lock.assert_not_called()
 
         hdf_data_set.save(dummy_h5f)
+        # pylint: disable=unnecessary-dunder-call
         calls = [mocker.call.__enter__(), mocker.call.__exit__(None, None, None)]
         mocked_lock.assert_has_calls(calls)
 
